@@ -19,4 +19,4 @@ DNS server runs as replicated service on the cluster. (one or more depending on 
 
 K8s service to perform load balancing for DNS server
 
-    `kubectl get services --n=kube-system kube-dns`
+    `kubectl get services --namespace=kube-system kube-dns`
