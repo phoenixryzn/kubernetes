@@ -46,3 +46,55 @@ For getting detailed information of a particular object, use `kubectl describe< 
 
 To get list of supported fields for each type, use `kubectl explain pods`
 
+Create or update objects using JSON/YAML file by `kubectl apply -f obj.yaml` command.
+For testing the changes before applying, use `kubectl apply -f --dry-run obj.yaml` command.
+
+Interactive edits to object instead of use of file can be done using `kubectl edit <resource-name> <object-name>`
+
+You can view/edit/set last applied information using `edit-last-applied, set-last-applied and view-last-applied` commands
+
+    `kubectl apply -f myobj.yaml view-last-applied`
+
+Delete the object using file: `kubectl delete -f obj.yaml` or by command: `kubectl delete <resource-name> <object-name>`
+
+## Labels and Annotations
+
+Labels and annotations are tags to objects. E.g. `kubectl label pods bar color=red`
+Remove a labe by using `<label-name>-` syntax. E.g. `kubectl label pods bar color-`
+
+## Debugging Commands
+
+We can access logs of containers using `kubectl logs <pod-name>`
+
+You can use the `exec` command to execute command in running container
+
+    `kubectl exec -it <pod-name> -- bash`
+
+The attach command is an alternative if there is no bash or any terminal available to send input to running process (assuming it is set up to read from std input)
+
+    `kubectl attach -it <pod-name>`
+
+Copying files to and from container using cp command
+
+    `kubectl cp <pod-name>:</path/to/remote/file> </path/to/local/file>
+
+Port forwarding from the host machine to container port: `kubectl port-forward <pod-name> <host-machine-port>:<container-port>`
+
+Same can be userd for port forwarding services by replacing `<pod-name>` with `<service-name>`
+
+Viewing events in kubernetes can be done using `kubectl get events`
+
+To get stats of how cluster is using resources, `kubectl top <nodes/pods>`
+Note: If Metrics API is not available, fix is available in https://medium.com/@cloudspinx/fix-error-metrics-api-not-available-in-kubernetes-aa10766e1c2f
+
+## Cluster Management
+
+Cordon and draining nodes to ensure preventing future pods from being scheduled while removing the pods remaining on the machine.
+Use case: Physical machine repairs or upgrades
+
+`kubectl cordon` `kubectl drain`
+
+Once the maintenance is completed, uncordon will re-enable pods scheduling on the node. No un-drain command. Duh!
+`kubectl uncordon`
+
+Getting the list of options and manual for k8s can be done by `kubectl help` or `kubectl help <command-name>`
