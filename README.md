@@ -1,100 +1,23 @@
 # Quick Reference
 
-## Namespace: kube-system
+## Pods
 
-### Kubernetes Proxy
+Kubernetes groups containers into single atomic unit called Pod.
 
-Responsible for routing network traffic to load-balanced service in the cluster. 
-Must be present in every node of cluster
+Clubbing of several containers in k8s into a single pod is common.
+Use case: Several service mesh implementations use a second sidecar container to inject network mgmt into pod.
 
-    `kubectl get daemonSets --namespace=kube-system kube-proxy`
-kube-proxy container will be running on all nodes in cluster
+### Pods in Kubernetes
 
-### Kubernetes DNS
+Network Namespace: A network namespace in Linux is a feature that provides an isolated view of the network stack for a group of processes. Essentially, it creates a virtualized network environment within the host system, allowing for multiple, independent network stacks to exist simultaneously. Each namespace has its own network devices, IP addresses, routing tables, and firewall rules, effectively creating separate network environments within the same machine. 
 
-K8s runs a DNS server for naming and discovery of services defined in cluster.
-DNS server runs as replicated service on the cluster. (one or more depending on size of cluster)
+UTS Namespace: A UTS namespace in Linux provides isolation of two system identifiers: the hostname and the NIS domain name. This allows processes within a namespace to have their own unique hostname and NIS domain name, separate from the host system or other namespaces. UTS stands for UNIX Time-sharing System.
 
-    kubectl get deployments --namespace=kube-system coredns
+Manifests: A pod manifest in Kubernetes is a file that defines the configuration of a pod, the smallest deployable unit in Kubernetes. It specifies the pod's metadata, such as its name and labels, and its spec, which includes the containers that run inside the pod.
 
-K8s service to perform load balancing for DNS server
+Kubernes API server accepts and processes manifests before storing in persistent storage (etcd). Scheduler uses the K8S API to find pods that hasn't been scheduled to node. Then, it places the ods onto nodes depending on resources and constraints in manifests.
 
-    kubectl get services --namespace=kube-system kube-dns
+To create only pods and not deployments, use the `kubectl run <pod-name> --image=<image-source>`. To delete the same, use `kubectl delete pods/<pod-name>`
 
-## Contexts
+To get the details of the pods or any resource for that matter, use `kubectl describe <resource-type> <resource-name>`
 
-Contexts are used to change the default namespace permanently. This is recorded in config file present in $HOME/.kube/config.
-
-    kubectl config set-context my-context --namespace=mystuff
-
-To use the newly created context,
-
-    kubectl config use-context my-context
-
-## Kubernetes API Objects
-
-Everything in K8s is represented by RESTful resources. Sample URI: `https://k8s-server.com/api/v1/namespace/default/pods/my-pod`
-
-To get the details of a particular objects you can use `kubectl get <object-name>`
-
-You can view multiple objects of differenttypes by using comma separated list of types.
-
-    kubectl get pods,services
-
-For getting detailed information of a particular object, use `kubectl describe< resource-name> <object-name>`
-
-
-To get list of supported fields for each type, use `kubectl explain pods`
-
-Create or update objects using JSON/YAML file by `kubectl apply -f obj.yaml` command.
-For testing the changes before applying, use `kubectl apply -f --dry-run obj.yaml` command.
-
-Interactive edits to object instead of use of file can be done using `kubectl edit <resource-name> <object-name>`
-
-You can view/edit/set last applied information using `edit-last-applied, set-last-applied and view-last-applied` commands
-
-    `kubectl apply -f myobj.yaml view-last-applied`
-
-Delete the object using file: `kubectl delete -f obj.yaml` or by command: `kubectl delete <resource-name> <object-name>`
-
-## Labels and Annotations
-
-Labels and annotations are tags to objects. E.g. `kubectl label pods bar color=red`
-Remove a labe by using `<label-name>-` syntax. E.g. `kubectl label pods bar color-`
-
-## Debugging Commands
-
-We can access logs of containers using `kubectl logs <pod-name>`
-
-You can use the `exec` command to execute command in running container
-
-    `kubectl exec -it <pod-name> -- bash`
-
-The attach command is an alternative if there is no bash or any terminal available to send input to running process (assuming it is set up to read from std input)
-
-    `kubectl attach -it <pod-name>`
-
-Copying files to and from container using cp command
-
-    `kubectl cp <pod-name>:</path/to/remote/file> </path/to/local/file>
-
-Port forwarding from the host machine to container port: `kubectl port-forward <pod-name> <host-machine-port>:<container-port>`
-
-Same can be userd for port forwarding services by replacing `<pod-name>` with `<service-name>`
-
-Viewing events in kubernetes can be done using `kubectl get events`
-
-To get stats of how cluster is using resources, `kubectl top <nodes/pods>`
-Note: If Metrics API is not available, fix is available in https://medium.com/@cloudspinx/fix-error-metrics-api-not-available-in-kubernetes-aa10766e1c2f
-
-## Cluster Management
-
-Cordon and draining nodes to ensure preventing future pods from being scheduled while removing the pods remaining on the machine.
-Use case: Physical machine repairs or upgrades
-
-`kubectl cordon` `kubectl drain`
-
-Once the maintenance is completed, uncordon will re-enable pods scheduling on the node. No un-drain command. Duh!
-`kubectl uncordon`
-
-Getting the list of options and manual for k8s can be done by `kubectl help` or `kubectl help <command-name>`
